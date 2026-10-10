@@ -171,6 +171,31 @@ export function Workbench() {
     present(session);
   }
 
+  async function downloadGuide() {
+    const response = await fetch("Schnittkante-Anleitung.pdf");
+    if (!response.ok) return;
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const filename = "Schnittkante-Anleitung.pdf";
+    const framed = window.parent !== window;
+    if (!framed) {
+      clickDownload(document, url, filename);
+    } else {
+      const popup = window.open("about:blank", "_blank");
+      if (popup) {
+        popup.document.open();
+        popup.document.write(
+          '<!doctype html><title>Schnittkante</title><body style="font-family:sans-serif;padding:24px"><p>Die Anleitung wird gespeichert. Diesen Tab kannst du danach schließen.</p></body>',
+        );
+        popup.document.close();
+        clickDownload(popup.document, url, filename);
+      } else {
+        clickDownload(document, url, filename);
+      }
+    }
+    window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
+  }
+
   function onDownload() {
     const blob = pdfBlobRef.current;
     if (!blob || !result) return;
@@ -239,6 +264,14 @@ export function Workbench() {
             >
               <RotateCcw className="size-4" aria-hidden="true" />
               Beispiel
+            </button>
+            <button
+              type="button"
+              onClick={() => void downloadGuide()}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-line bg-sheet px-4 text-sm font-medium"
+            >
+              <Download className="size-4" aria-hidden="true" />
+              Anleitung
             </button>
           </div>
         </div>
