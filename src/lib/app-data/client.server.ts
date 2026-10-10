@@ -18,7 +18,7 @@ import {
 assertAppDataServerOnly("app-data/client.server");
 
 function connectorsBaseFor(): string | null {
-  const explicit = env("GROK_CONNECTORS_URL");
+  const explicit = env("CONNECTORS_URL");
   if (!explicit) return null;
   return explicit.replace(/\/+$/, "");
 }
@@ -46,7 +46,7 @@ function inboundContext(): InboundContext {
   const envToken =
     process.env.NODE_ENV === "production"
       ? null
-      : (env("GROK_CONNECTOR_ACCESS_TOKEN") ?? null);
+      : (env("CONNECTOR_ACCESS_TOKEN") ?? null);
   return {
     token: headerToken ?? envToken,
     publicHost,

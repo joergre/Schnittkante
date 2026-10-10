@@ -4,16 +4,16 @@ import {
   type JWK,
   type JWTVerifyGetKey,
 } from "jose";
-import { env, isWorkspacePreview } from "../env.server.ts";
+import { env } from "../env.server.ts";
 
-export const GATE_IDENTITY_HEADER = "x-grok-identity";
+export const GATE_IDENTITY_HEADER = "x-app-identity";
 export const GATE_JWKS_PATH = "/__gate/identity-key";
 
 const JWKS_CACHE_TTL_MS = 300_000;
 const PREVIEW_AUDIENCE = "preview";
 export const PREVIEW_GATE_ORIGIN = "http://127.0.0.1:6014";
 const FALLBACK_EMAIL_DOMAIN = "viewer.example.invalid";
-const FALLBACK_NAME = "Grok user";
+const FALLBACK_NAME = "User";
 
 export type GateIdentity = {
   sub: string;
@@ -31,8 +31,7 @@ export function gateIdentityEnabled(): boolean {
 }
 
 export function gateTokenAudience(): string {
-  if (isWorkspacePreview()) return PREVIEW_AUDIENCE;
-  return `app:${env("GROK_PROJECT_ID")}`;
+  return PREVIEW_AUDIENCE;
 }
 
 async function defaultJwksFetch(url: string): Promise<GateJwks | null> {
@@ -122,37 +121,11 @@ export async function verifyGateIdentityToken(
 
 type GateEndpoints = { issuer: string; jwksUrl: string };
 
-export function resolveGateEndpoints(headers: Headers): GateEndpoints | null {
-  const explicit = env("GROK_GATE_ORIGIN");
-  if (explicit) {
-    const origin = explicit.replace(/\/+$/, "");
-    return { issuer: origin, jwksUrl: `${origin}${GATE_JWKS_PATH}` };
-  }
-
-  if (isWorkspacePreview()) {
-    return {
-      issuer: PREVIEW_GATE_ORIGIN,
-      jwksUrl: `${PREVIEW_GATE_ORIGIN}${GATE_JWKS_PATH}`,
-    };
-  }
-
-  const xf = headers.get("x-forwarded-host")?.split(",")[0]?.trim();
-  const host = (xf || headers.get("host") || "")
-    .split(":")[0]
-    ?.trim()
-    .toLowerCase();
-  if (!host) return null;
-
-  let issuer: string | null = null;
-  if (
-    host === "app-builder-testing.com" ||
-    host.endsWith(".app-builder-testing.com")
-  ) {
-    issuer = "https://gate.app-builder-testing.com";
-  }
-  if (!issuer) return null;
-
-  return { issuer, jwksUrl: `${issuer}${GATE_JWKS_PATH}` };
+export function resolveGateEndpoints(_headers: Headers): GateEndpoints | null {
+  return {
+    issuer: PREVIEW_GATE_ORIGIN,
+    jwksUrl: `${PREVIEW_GATE_ORIGIN}${GATE_JWKS_PATH}`,
+  };
 }
 
 export type GateLinkedAccount = { providerId: string; accountId: string };

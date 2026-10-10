@@ -1,4 +1,4 @@
-export function isGrokEmbedderOrigin(origin: string): boolean {
+export function isLocalEmbedderOrigin(origin: string): boolean {
   try {
     const url = new URL(origin);
     if (url.protocol !== "https:" && url.protocol !== "http:") return false;
@@ -39,7 +39,7 @@ export function resolveParentEmbedderOrigin(
         candidate.includes("://") ? candidate : `https://${candidate}`,
       );
       if (url.protocol !== "https:" && url.protocol !== "http:") continue;
-      if (isGrokEmbedderOrigin(url.origin)) return url.origin;
+      if (isLocalEmbedderOrigin(url.origin)) return url.origin;
       if (
         isSandboxPreviewGuestHost(guestHostname) ||
         isRemintPreviewPair(guestHostname, url.hostname)

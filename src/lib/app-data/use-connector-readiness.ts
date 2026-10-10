@@ -39,11 +39,9 @@ async function isConnectorReady(): Promise<boolean> {
  * While `waiting` is true (a connector call returned `pending`), probes the
  * server for the connector token and calls `refetch` once it is present. The
  * probe is a header check on the app's own server — it never reaches the gate.
- * A `connector-token-ready` bridge event from the Grok preview chrome triggers
- * `refetch` immediately. A top-level page (download/export, local dev, the
- * sandbox's own `npm run preview`) is not framed by any preview, so no token
- * can ever arrive: the hook reports `not_embedded` without probing. Any framed
- * page probes, even when the parent origin cannot be resolved (empty referrer,
+ * A connector-token-ready event triggers `refetch` immediately. A top-level page
+ * is not framed, so no token can arrive: the hook reports `not_embedded`
+ * without probing. A framed page probes even when the parent origin cannot be resolved (empty referrer,
  * no `ancestorOrigins`): the token comes through the preview proxy, and the
  * bridge event is only the faster signal.
  */

@@ -1,8 +1,6 @@
 /**
- * Guest side of the grok-web ↔ sandbox preview postMessage bridge.
- *
- * Activates only when this page is framed by an allowlisted Grok embedder.
- * Top-level runs (download/export, local `npm run dev`, deployed sites) noop.
+ * Optional postMessage bridge for an embedding parent.
+ * Top-level runs noop.
  */
 
 import { z } from "zod";
@@ -10,12 +8,12 @@ import { CONNECTOR_TOKEN_READY_EVENT } from "./app-data/types";
 import { resolveParentEmbedderOrigin } from "./preview-embedder-origin";
 
 export {
-  isGrokEmbedderOrigin,
+  isLocalEmbedderOrigin,
   isSandboxPreviewGuestHost,
   resolveParentEmbedderOrigin,
 } from "./preview-embedder-origin";
 
-export const PREVIEW_BRIDGE_CHANNEL = "grok-preview-bridge" as const;
+export const PREVIEW_BRIDGE_CHANNEL = "preview-bridge" as const;
 export const PREVIEW_BRIDGE_VERSION = 1 as const;
 
 const EnvelopeSchema = z.object({
@@ -62,9 +60,8 @@ export function isSafeBridgePath(path: string): boolean {
 }
 
 /**
- * Origin of the Grok embedder framing this page, or null when the page runs
- * top-level (download/export, local `npm run dev`, deployed sites) or under a
- * non-Grok parent. Client-only; null during SSR.
+ * Origin of the parent frame, or null when the page runs on its own.
+ * Client-only; null during SSR.
  */
 export function resolveCurrentEmbedderOrigin(): string | null {
   if (typeof window === "undefined") return null;
@@ -82,7 +79,7 @@ export function resolveCurrentEmbedderOrigin(): string | null {
 
 /**
  * Install host↔guest messaging. Returns a dispose function.
- * Noops (returns a no-op dispose) when not embedded under a Grok parent.
+ * Noops when the page is not embedded.
  */
 export function installPreviewHostBridge(
   options: PreviewHostBridgeOptions = {},
@@ -90,7 +87,7 @@ export function installPreviewHostBridge(
   const parentOrigin = resolveCurrentEmbedderOrigin();
   if (parentOrigin === null) return () => {};
 
-  const ROOT_STATE_KEY = "__grokPreviewBridgeRoot";
+  const ROOT_STATE_KEY = "__previewBridgeRoot";
   const originalPushState = window.history.pushState.bind(window.history);
   const originalReplaceState = window.history.replaceState.bind(window.history);
 
