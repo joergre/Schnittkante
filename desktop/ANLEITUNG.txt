@@ -1,0 +1,31 @@
+Schnittkante
+============
+
+Bögen (gescannte Seiten) an den roten Linien in einzelne PDFs schneiden.
+Nichts wird ins Internet geschickt. Die PDF bleibt auf diesem Rechner.
+
+Windows, ohne Installation
+  Schnittkante.exe doppelklicken.
+  Windows meldet „Unbekannter Herausgeber“, weil das Programm nicht gekauft
+  und nicht signiert ist.
+  Weitere Informationen, dann Trotzdem ausführen.
+
+Windows, mit Installation
+  Schnittkante-Setup.exe doppelklicken.
+  Dieselbe Warnung, ebenso bestätigen.
+  Danach liegt Schnittkante im Startmenü.
+
+Linux, eine Datei
+  Schnittkante.AppImage anklicken.
+  Falls sie sich nicht öffnet: Eigenschaften, als Programm ausführen erlauben.
+  Oder im Terminal: chmod +x Schnittkante.AppImage && ./Schnittkante.AppImage
+
+Linux, Installation (Ubuntu, Mint, Debian)
+  schnittkante.deb doppelklicken und installieren.
+  Oder: sudo apt install ./schnittkante.deb
+
+Bedienung
+  1. Oben die Aufteilung wählen: 4→1, 2→1, 2 (90°)→1 oder 1→1.
+  2. Rote Linien an den Rand ziehen.
+  3. Schnitt ausführen.
+  4. ZIP-Datei herunterladen. Darin liegt eine PDF pro Seite.

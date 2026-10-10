@@ -1,0 +1,49 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,640&family=Outfit:wght@400;500;600&display=swap");
+@import "tailwindcss";
+@source "./components";
+@source "./lib";
+@source "../desktop";
+
+@theme {
+  --font-sans: "Outfit", "Avenir Next", "Segoe UI", sans-serif;
+  --font-serif: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --color-paper: #f3efe6;
+  --color-sheet: #fffcf8;
+  --color-ink: #1e1a16;
+  --color-muted: #6e655c;
+  --color-line: #e4ddd2;
+  --color-crop: #c4452d;
+  --color-crop-soft: #f8e6e1;
+  --radius-card: 1rem;
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    min-height: 100%;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--color-crop-soft);
+    color: var(--color-ink);
+  }
+}
+
+@utility shadow-sheet {
+  box-shadow:
+    0 1px 0 rgb(30 26 22 / 0.04),
+    0 16px 40px -28px rgb(30 26 22 / 0.55);
+}

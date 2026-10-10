@@ -1,0 +1,10 @@
+node_modules
+desktop/node_modules
+desktop/dist
+desktop/release
+.grok
+artifacts
+screenshots
+.vercel
+dist
+*.log
