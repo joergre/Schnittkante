@@ -269,7 +269,7 @@ describe("redirectToLoginIfRequired", () => {
           assign: (u) => {
             target = u;
           },
-          href: "https://my-app.grok.me/current",
+          href: "https://app.example/current",
         },
       },
       () =>
@@ -291,7 +291,7 @@ describe("redirectToLoginIfRequired", () => {
           assign: (u) => {
             target = u;
           },
-          href: "https://my-app.grok.me/current",
+          href: "https://app.example/current",
         },
       },
       () =>
@@ -299,11 +299,11 @@ describe("redirectToLoginIfRequired", () => {
           ok: false,
           data: null,
           loginRequired: true,
-          loginUrl: "https://gate.grok.me/__gate/signin?return_to=x",
+          loginUrl: "https://login.example/signin?return_to=x",
         }),
     );
     assert.equal(did, true);
-    assert.equal(target, "https://gate.grok.me/__gate/signin?return_to=x");
+    assert.equal(target, "https://login.example/signin?return_to=x");
   });
 
   it("opens a new tab instead of navigating when framed", () => {
@@ -322,7 +322,7 @@ describe("redirectToLoginIfRequired", () => {
           assign: (u) => {
             assigned = u;
           },
-          href: "https://my-app.grok.me/current",
+          href: "https://app.example/current",
         },
       },
       () =>
@@ -330,11 +330,11 @@ describe("redirectToLoginIfRequired", () => {
           ok: false,
           data: null,
           loginRequired: true,
-          loginUrl: "https://gate.grok.me/__gate/signin?return_to=x",
+          loginUrl: "https://login.example/signin?return_to=x",
         }),
     );
     assert.equal(did, true);
-    assert.equal(opened, "https://gate.grok.me/__gate/signin?return_to=x");
+    assert.equal(opened, "https://login.example/signin?return_to=x");
     assert.equal(openedTab.opener, null);
     assert.equal(assigned, "");
   });
@@ -350,7 +350,7 @@ describe("redirectToLoginIfRequired", () => {
           assign: (u) => {
             assigned = u;
           },
-          href: "https://my-app.grok.me/current",
+          href: "https://app.example/current",
         },
       },
       () =>
@@ -358,11 +358,11 @@ describe("redirectToLoginIfRequired", () => {
           ok: false,
           data: null,
           loginRequired: true,
-          loginUrl: "https://gate.grok.me/__gate/signin?return_to=x",
+          loginUrl: "https://login.example/signin?return_to=x",
         }),
     );
     assert.equal(did, true);
-    assert.equal(assigned, "https://gate.grok.me/__gate/signin?return_to=x");
+    assert.equal(assigned, "https://login.example/signin?return_to=x");
   });
 
   it("returns false when the result has no loginUrl", () => {
@@ -373,7 +373,7 @@ describe("redirectToLoginIfRequired", () => {
           assign: (u) => {
             target = u;
           },
-          href: "https://my-app.grok.me/current",
+          href: "https://app.example/current",
         },
       },
       () =>
@@ -388,7 +388,7 @@ describe("redirectToLoginIfRequired", () => {
       ok: false,
       data: null,
       loginRequired: true,
-      loginUrl: "https://gate.grok.me/__gate/signin?return_to=x",
+      loginUrl: "https://login.example/signin?return_to=x",
     });
     assert.equal(did, false);
   });

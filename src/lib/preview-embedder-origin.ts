@@ -3,7 +3,6 @@ export function isGrokEmbedderOrigin(origin: string): boolean {
     const url = new URL(origin);
     if (url.protocol !== "https:" && url.protocol !== "http:") return false;
     const host = url.hostname.toLowerCase();
-    if (host === "grok.com" || host.endsWith(".grok.com")) return true;
     if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") return true;
     return false;
   } catch {
@@ -11,9 +10,8 @@ export function isGrokEmbedderOrigin(origin: string): boolean {
   }
 }
 
-export function isSandboxPreviewGuestHost(hostname: string): boolean {
-  const host = hostname.toLowerCase();
-  return host === "grok-sandbox.com" || host.endsWith(".grok-sandbox.com");
+export function isSandboxPreviewGuestHost(_hostname: string): boolean {
+  return false;
 }
 
 function isRemintPreviewPair(guestHost: string, parentHost: string): boolean {
@@ -25,7 +23,7 @@ function isRemintPreviewPair(guestHost: string, parentHost: string): boolean {
   const label = guest.slice(0, i);
   const rest = guest.slice(i + sep.length);
   if (label.includes(".") || !rest.includes(".")) return false;
-  return parent === rest || parent === `grok.${rest}`;
+  return parent === rest;
 }
 
 export function resolveParentEmbedderOrigin(

@@ -285,7 +285,7 @@ describe("gateIdentityFromHeaders", () => {
     );
     const identity = await gateIdentityFromHeaders(
       new Headers({
-        host: "my-session.grok-sandbox.com",
+        host: "app.example",
         "x-grok-identity": token,
       }),
       fetchImpl,
@@ -428,7 +428,7 @@ describe("gateIdentityUserInfo", () => {
       }),
       {
         id: "User-1",
-        email: "user-1@viewer.grok.invalid",
+        email: "user-1@viewer.example.invalid",
         emailVerified: false,
         name: "Grok user",
       },

@@ -67,16 +67,8 @@ function setBearerToken(token: string | null): void {
   }
 }
 
-/**
- * The sandbox live preview runs this app inside an iframe on a `*.grok-sandbox.com`
- * host, where a full-page redirect to the broker can't work — so sign-in uses a
- * popup there and a normal redirect everywhere else.
- */
 function inLivePreview(): boolean {
-  return (
-    typeof window !== "undefined" &&
-    window.location.hostname.endsWith(".grok-sandbox.com")
-  );
+  return false;
 }
 
 /** Message the popup posts back to the opener once sign-in completes. */

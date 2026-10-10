@@ -12,7 +12,7 @@ export const GATE_JWKS_PATH = "/__gate/identity-key";
 const JWKS_CACHE_TTL_MS = 300_000;
 const PREVIEW_AUDIENCE = "preview";
 export const PREVIEW_GATE_ORIGIN = "http://127.0.0.1:6014";
-const FALLBACK_EMAIL_DOMAIN = "viewer.grok.invalid";
+const FALLBACK_EMAIL_DOMAIN = "viewer.example.invalid";
 const FALLBACK_NAME = "Grok user";
 
 export type GateIdentity = {
@@ -149,8 +149,6 @@ export function resolveGateEndpoints(headers: Headers): GateEndpoints | null {
     host.endsWith(".app-builder-testing.com")
   ) {
     issuer = "https://gate.app-builder-testing.com";
-  } else if (host === "grok.me" || host.endsWith(".grok.me")) {
-    issuer = "https://gate.grok.me";
   }
   if (!issuer) return null;
 

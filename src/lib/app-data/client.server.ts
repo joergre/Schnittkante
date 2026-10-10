@@ -18,7 +18,9 @@ import {
 assertAppDataServerOnly("app-data/client.server");
 
 function connectorsBaseFor(): string | null {
-  return null;
+  const explicit = env("GROK_CONNECTORS_URL");
+  if (!explicit) return null;
+  return explicit.replace(/\/+$/, "");
 }
 
 type InboundContext = {
