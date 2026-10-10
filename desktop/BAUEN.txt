@@ -1,0 +1,19 @@
+So entstehen die Dateien
+========================
+
+1. Oberfläche bauen, im Projektordner:
+   node node_modules/vite/bin/vite.js build --config desktop/vite.config.ts
+
+2. Linux-AppImage und die Windows-Startdatei:
+   cd desktop && npx electron-builder --win portable --linux AppImage --x64
+
+3. Windows-Installation Schnittkante-Setup.exe:
+   makensis -NOCD desktop/installer.nsi
+   Dafür liegt makensis bei electron-builder (linux/makensis).
+
+4. Linux-Installation schnittkante.deb:
+   aus desktop/release/linux-unpacked, siehe die Befehle in dieser Unterhaltung.
+   Das Paket legt das Programm nach /opt/Schnittkante.
+
+Electron ist kostenlos (MIT). Die Programme sind nicht signiert.
+Unter Windows: Weitere Informationen, dann Trotzdem ausführen.

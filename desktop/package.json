@@ -1,0 +1,79 @@
+{
+  "name": "schnittkante",
+  "productName": "Schnittkante",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gescannte Bögen an den Rändern in Einzelseiten schneiden.",
+  "author": "Schnittkante",
+  "homepage": "https://schnittkante.local",
+  "main": "electron-main.cjs",
+  "scripts": {
+    "dist": "electron-builder --win portable nsis --linux AppImage deb --x64"
+  },
+  "build": {
+    "appId": "de.schnittkante.app",
+    "productName": "Schnittkante",
+    "asar": false,
+    "npmRebuild": false,
+    "toolsets": {
+      "wine": "1.0.1"
+    },
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron-main.cjs",
+      "dist/**/*",
+      "build/icon.png",
+      "build/icon.ico",
+      "package.json"
+    ],
+    "extraFiles": [
+      "ANLEITUNG.txt"
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "build/icon.png",
+      "category": "Office",
+      "maintainer": "Schnittkante",
+      "artifactName": "Schnittkante.${ext}"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "portable": {
+      "artifactName": "Schnittkante.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "artifactName": "Schnittkante-Setup.${ext}",
+      "shortcutName": "Schnittkante"
+    },
+    "deb": {
+      "artifactName": "schnittkante.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.7.5",
+    "electron-builder": "^26.15.3"
+  }
+}
