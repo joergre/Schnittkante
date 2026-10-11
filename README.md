@@ -38,6 +38,8 @@ Zuerst oben die Aufteilung wählen: **4→1**, **2→1**, **2 (90°)→1** oder 
 Danach erst die PDF öffnen. Ein Umschalten, wenn der Bogen schon da ist, ändert den Schnitt nicht.
 War die Wahl falsch, die richtige Art wählen und dieselbe PDF erneut öffnen.
 
+**Beispiel** lädt den passenden Bogen. **Beispiel 4→1** öffnet `Beispiel-4.pdf`: drei Bögen, auf jedem vier Seiten. **Beispiel 2→1** öffnet `Beispiel-2.pdf`: sechs Bögen, auf jedem zwei Seiten nebeneinander. Für 2 (90°)→1 und 1→1 liegt kein eigener Beispielbogen bei.
+
 Die roten Linien prüfen und bei Bedarf ziehen. Das schneidet noch nicht.
 **Schnitt ausführen** startet den Schnitt. Danach das ZIP speichern.
 Der Dateiname endet auf `-einzelseiten.zip`, darin liegt eine PDF je Seite.
@@ -107,6 +109,8 @@ For the AppImage, allow it to run as a program once, or run `chmod +x Schnittkan
 First choose the layout at the top: **4→1**, **2→1**, **2 (90°)→1**, or **1→1**.
 Only then open the PDF. Switching after the sheet is already on screen does not change the cut.
 If the choice was wrong, select the right one and open the same PDF again.
+
+**Beispiel** loads the matching sheet. **Beispiel 4→1** opens `Beispiel-4.pdf`: three sheets, four pages on each. **Beispiel 2→1** opens `Beispiel-2.pdf`: six sheets, two pages side by side on each. There is no separate sample for 2 (90°)→1 or 1→1.
 
 Check the red lines and drag them if needed. That does not cut yet.
 **Schnitt ausführen** runs the cut. Then save the ZIP.

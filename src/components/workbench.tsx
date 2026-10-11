@@ -3,8 +3,14 @@ import { Crop, Download, FileUp, RotateCcw } from "lucide-react";
 import { panelsFromRows, type RowCut, type SplitMode } from "@/lib/sheet-split";
 import type { SplitResult, SplitSession } from "@/lib/pdf-split";
 
-const SAMPLE = "probe/beispielbogen.pdf";
-const SAMPLE_NAME = "Beispielbogen.pdf";
+const SAMPLES: Partial<Record<SplitMode, { path: string; name: string }>> = {
+  quad: { path: "probe/beispiel-4.pdf", name: "Beispiel-4.pdf" },
+  duo: { path: "probe/beispiel-2.pdf", name: "Beispiel-2.pdf" },
+};
+
+function sampleFor(mode: SplitMode) {
+  return SAMPLES[mode] ?? null;
+}
 
 type ServerJob = {
   id: string;
@@ -24,15 +30,15 @@ const CONFIDENCE: Record<SplitResult["sheets"][number]["confidence"], string> = 
 };
 
 const MODES: { id: SplitMode; label: string; hint: string }[] = [
-  { id: "quad", label: "4→1", hint: "Vier Seiten, zwei Zeilen" },
-  { id: "duo", label: "2→1", hint: "Zwei Seiten nebeneinander" },
+  { id: "quad", label: "4→1", hint: "Vier Seiten, zwei Zeilen. Beispiel-4.pdf: drei Bögen" },
+  { id: "duo", label: "2→1", hint: "Zwei Seiten nebeneinander. Beispiel-2.pdf: sechs Bögen" },
   { id: "duo90", label: "2 (90°)→1", hint: "Zwei Seiten übereinander, um eine Vierteldrehung aufgestellt" },
   { id: "single", label: "1→1", hint: "Der Bogen bleibt eine Seite" },
 ];
 
 export function Workbench() {
   const [phase, setPhase] = useState<"loading" | "ready" | "error">("loading");
-  const [note, setNote] = useState("Beispielbogen wird vermessen");
+  const [note, setNote] = useState("Beispiel-4 wird vermessen");
   const [error, setError] = useState("");
   const [result, setResult] = useState<SplitResult | null>(null);
   const [forced, setForced] = useState(false);
@@ -46,6 +52,7 @@ export function Workbench() {
   const pdfBlobRef = useRef<Blob | null>(null);
   const pdfUrlRef = useRef<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const sampleRef = useRef(true);
 
   useEffect(() => {
     void loadSample();
@@ -53,13 +60,20 @@ export function Workbench() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadSample() {
+  async function loadSample(forMode: SplitMode = modeRef.current) {
+    const sample = sampleFor(forMode);
+    if (!sample) {
+      setSavedNote("Für 2 (90°)→1 und 1→1 liegt kein eigener Beispielbogen bei. Beispiel-4.pdf gehört zu 4→1, Beispiel-2.pdf zu 2→1.");
+      return;
+    }
     setError("");
+    setSavedNote("");
     try {
-      const response = await fetch(SAMPLE);
+      const response = await fetch(sample.path);
       if (!response.ok) throw new Error("Beispielbogen nicht gefunden");
       const bytes = new Uint8Array(await response.arrayBuffer());
-      await run(bytes, SAMPLE_NAME);
+      sampleRef.current = true;
+      await run(bytes, sample.name);
     } catch (err) {
       setPhase("error");
       setError(err instanceof Error ? err.message : "Der Bogen konnte nicht gelesen werden");
@@ -141,6 +155,7 @@ export function Workbench() {
       return;
     }
     const bytes = new Uint8Array(await file.arrayBuffer());
+    sampleRef.current = false;
     await run(bytes, file.name);
   }
 
@@ -253,6 +268,14 @@ export function Workbench() {
     modeRef.current = next;
     setMode(next);
     setForced(false);
+    if (sampleRef.current) {
+      if (sampleFor(next)) {
+        await loadSample(next);
+        return;
+      }
+      setSavedNote("Für 2 (90°)→1 und 1→1 liegt kein eigener Beispielbogen bei. Beispiel-4.pdf gehört zu 4→1, Beispiel-2.pdf zu 2→1.");
+      return;
+    }
     if (serverIdRef.current) {
       setSavedNote("Die Aufteilung gilt, wenn die PDF erneut geöffnet wird.");
       return;
@@ -359,11 +382,11 @@ export function Workbench() {
             </label>
             <button
               type="button"
-              onClick={() => void loadSample()}
+              onClick={() => void loadSample(modeRef.current)}
               className="inline-flex h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-muted"
             >
               <RotateCcw className="size-4" aria-hidden="true" />
-              Beispiel
+              {mode === "duo" ? "Beispiel 2→1" : "Beispiel 4→1"}
             </button>
             <button
               type="button"
@@ -409,6 +432,9 @@ export function Workbench() {
               );
             })}
           </div>
+          <p className="basis-full text-sm text-muted">
+            Beispiel-4.pdf zeigt 4→1: drei Bögen mit je vier Seiten. Beispiel-2.pdf zeigt 2→1: sechs Bögen mit je zwei Seiten.
+          </p>
         </div>
       </header>
 
@@ -564,6 +590,7 @@ export function Workbench() {
                       </button>
                     )}
                   </div>
+                  {savedNote && <p className="mt-3 text-sm text-muted">{savedNote}</p>}
                 </div>
               )}
             </section>
