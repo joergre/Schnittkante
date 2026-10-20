@@ -18,10 +18,6 @@ type ServerJob = {
   sheets: SplitResult["sheets"];
 };
 
-function usesServer() {
-  return typeof window !== "undefined" && window.location.protocol !== "file:";
-}
-
 const CONFIDENCE: Record<SplitResult["sheets"][number]["confidence"], string> = {
   edges: "Seitenkanten erkannt",
   gutter: "Schnitt am weißen Bund",
@@ -55,12 +51,16 @@ export function Workbench() {
   const sampleRef = useRef(true);
 
   useEffect(() => {
-    void loadSample();
+    const alive = { current: true };
+    void loadSample(modeRef.current, alive);
+    return () => {
+      alive.current = false;
+    };
     // The sample is the document this desk opens with.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadSample(forMode: SplitMode = modeRef.current) {
+  async function loadSample(forMode: SplitMode = modeRef.current, alive?: { current: boolean }) {
     const sample = sampleFor(forMode);
     if (!sample) {
       setSavedNote("Für 2 (90°)→1 und 1→1 liegt kein eigener Beispielbogen bei. Beispiel-4.pdf gehört zu 4→1, Beispiel-2.pdf zu 2→1.");
@@ -69,12 +69,18 @@ export function Workbench() {
     setError("");
     setSavedNote("");
     try {
+      sampleRef.current = true;
       const response = await fetch(sample.path);
+      if (alive && !alive.current) return;
+      if (!sampleRef.current) return;
       if (!response.ok) throw new Error("Beispielbogen nicht gefunden");
       const bytes = new Uint8Array(await response.arrayBuffer());
-      sampleRef.current = true;
+      if (alive && !alive.current) return;
+      if (!sampleRef.current) return;
       await run(bytes, sample.name);
     } catch (err) {
+      if (alive && !alive.current) return;
+      if (!sampleRef.current) return;
       setPhase("error");
       setError(err instanceof Error ? err.message : "Der Bogen konnte nicht gelesen werden");
     }
@@ -82,36 +88,14 @@ export function Workbench() {
 
   async function run(bytes: Uint8Array, name: string) {
     const job = ++jobRef.current;
-    sessionRef.current = null;
     serverIdRef.current = null;
     setPhase("loading");
     setNote(name);
     setError("");
     setForced(false);
     setSavedNote("");
-    setResult(null);
     try {
-      if (usesServer()) {
-        const form = new FormData();
-        form.set("file", new File([bytes], name, { type: "application/pdf" }));
-        form.set("mode", modeRef.current);
-        const response = await fetch("/api/bogen", { method: "POST", body: form });
-        const data = (await response.json()) as ServerJob & { error?: string };
-        if (!response.ok || !data.id) throw new Error(data.error || "Der Server hat die PDF nicht angenommen");
-        if (job !== jobRef.current) return;
-        serverIdRef.current = data.id;
-        setResult({ name: data.name, sheets: data.sheets, pages: [], pdfUrl: "", blob: new Blob(), byteSize: 0 });
-        setCut("open");
-        setPhase("ready");
-        return;
-      }
-      const api = await import("@/lib/pdf-split");
-      const session = await api.openPdf(bytes, name, modeRef.current);
-      if (job !== jobRef.current) return;
-      api.applyMode(session, modeRef.current);
-      if (job !== jobRef.current) return;
-      sessionRef.current = session;
-      present(session);
+      await openLocal(bytes, name, job, "");
     } catch (err) {
       if (job !== jobRef.current) return;
       setPhase("error");
@@ -119,7 +103,22 @@ export function Workbench() {
     }
   }
 
-  function present(session: SplitSession) {
+  async function openLocal(bytes: Uint8Array, name: string, job: number, note: string) {
+    const api = await import("@/lib/pdf-split");
+    const session = await api.openPdf(bytes, name, modeRef.current);
+    if (job !== jobRef.current) return;
+    api.applyMode(session, modeRef.current);
+    if (job !== jobRef.current) return;
+    const previous = sessionRef.current;
+    sessionRef.current = session;
+    serverIdRef.current = null;
+    present(session, note);
+    if (previous && previous !== session) {
+      window.setTimeout(() => releaseSheets(previous), 2000);
+    }
+  }
+
+  function present(session: SplitSession, note = "") {
     if (pdfUrlRef.current) URL.revokeObjectURL(pdfUrlRef.current);
     pdfUrlRef.current = null;
     pdfBlobRef.current = null;
@@ -128,7 +127,7 @@ export function Workbench() {
       setResult(api.stageSession(session));
       setCut("open");
       setPhase("ready");
-      setSavedNote("");
+      setSavedNote(note);
     });
   }
 
@@ -149,13 +148,13 @@ export function Workbench() {
   }
 
   async function onFile(file: File) {
+    sampleRef.current = false;
     if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
       setPhase("error");
       setError("Bitte eine PDF-Datei ablegen.");
       return;
     }
     const bytes = new Uint8Array(await file.arrayBuffer());
-    sampleRef.current = false;
     await run(bytes, file.name);
   }
 
@@ -211,12 +210,16 @@ export function Workbench() {
             sheets: result.sheets.map((sheet) => ({ index: sheet.index, rows: sheet.rows })),
           }),
         });
-        const data = (await response.json()) as {
-          error?: string;
-          download?: string;
-          pages?: SplitResult["pages"];
-        };
-        if (!response.ok || !data.download || !data.pages) throw new Error(data.error || "Der Server hat nicht geschnitten");
+        const raw = await response.text();
+        let data: { error?: string; download?: string; pages?: SplitResult["pages"] } | null = null;
+        try {
+          data = JSON.parse(raw) as { error?: string; download?: string; pages?: SplitResult["pages"] };
+        } catch {
+          data = null;
+        }
+        if (!response.ok || !data?.download || !data.pages) {
+          throw new Error(data?.error || "Der Server hat nicht geschnitten");
+        }
         if (job !== jobRef.current) return;
         setResult((current) =>
           current ? { ...current, pages: data.pages ?? [], pdfUrl: data.download ?? "" } : current,
@@ -599,6 +602,12 @@ export function Workbench() {
       </main>
     </div>
   );
+}
+
+function releaseSheets(session: SplitSession) {
+  for (const sheet of session.sheets) {
+    if (sheet.sheetUrl.startsWith("blob:")) URL.revokeObjectURL(sheet.sheetUrl);
+  }
 }
 
 function clickDownload(doc: Document, href: string, filename: string) {

@@ -89,7 +89,7 @@ export async function openPdf(bytes: Uint8Array, name: string, mode: SplitMode =
         width: canvas.width,
         height: canvas.height,
         canvas,
-        sheetUrl: canvas.toDataURL("image/jpeg", 0.82),
+        sheetUrl: await jpegUrl(canvas, 0.82),
         pdfWidth: natural.width,
         pdfHeight: natural.height,
         detection: detectSheet(gray, canvas.width, canvas.height, mode),
@@ -271,6 +271,18 @@ function cropUrl(canvas: HTMLCanvasElement, panel: Panel, rotation: PageRotation
   ctx.drawImage(canvas, panel.x, panel.y, panel.w, panel.h, 0, 0, dw, dh);
   ctx.restore();
   return out.toDataURL("image/jpeg", 0.86);
+}
+
+function jpegUrl(canvas: HTMLCanvasElement, quality: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error("Vorschau konnte nicht erzeugt werden"));
+        return;
+      }
+      resolve(URL.createObjectURL(blob));
+    }, "image/jpeg", quality);
+  });
 }
 
 function clamp(value: number, lo: number, hi: number) {

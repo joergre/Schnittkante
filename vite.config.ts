@@ -124,6 +124,8 @@ export default defineConfig(({ command, isPreview }) => ({
             // Auto-registers server/middleware/* (the cut API). Nitro v3
             // defaults serverDir to false, so removing this drops /api/bogen.
             serverDir: "./server",
+            // A restored platform file imports a page that is not part of this app.
+            ignore: ["middleware/grok-pwa.ts"],
           }),
         ]
       : []),

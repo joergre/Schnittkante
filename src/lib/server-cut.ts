@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { pathToFileURL } from "node:url";
-import { createRequire } from "node:module";
 import { PDFDocument, degrees, type PDFPage } from "pdf-lib";
+import { WorkerMessageHandler } from "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import { zipSync } from "fflate";
 import {
   detectSheet,
@@ -14,7 +13,13 @@ import {
   type SplitMode,
 } from "@/lib/sheet-split";
 
-const require = createRequire(import.meta.url);
+// The published function has no separate worker file. pdf.js on Node already
+// stays on the main thread, but it still imports `workerSrc` unless the
+// handler is already on globalThis.
+const workerScope = globalThis as typeof globalThis & {
+  pdfjsWorker?: { WorkerMessageHandler: typeof WorkerMessageHandler };
+};
+workerScope.pdfjsWorker = { WorkerMessageHandler };
 const RENDER_SCALE = 2;
 const FRAME = 14;
 const TTL_MS = 60 * 60 * 1000;
@@ -138,8 +143,6 @@ export function takeZip(id: string) {
 
 async function renderSheets(bytes: Uint8Array, mode: SplitMode, even: boolean) {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const worker = pathToFileURL(require.resolve("pdfjs-dist/legacy/build/pdf.worker.mjs")).href;
-  pdfjs.GlobalWorkerOptions.workerSrc = worker;
   const doc = await pdfjs.getDocument({ data: new Uint8Array(bytes), useSystemFonts: true, isEvalSupported: false }).promise;
   const sheets: StoredSheet[] = [];
   try {
